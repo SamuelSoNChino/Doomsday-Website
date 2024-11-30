@@ -75,7 +75,9 @@
             }
         });
 
-        // Generate dates when the button is clicked
+        let generatedDates = []; // Store dates on the client side
+
+        // When generating dates
         document.getElementById('generate-dates').addEventListener('click', async () => {
             const interval = intervalSelect.value;
             const numDates = document.getElementById('num-dates').value;
@@ -95,11 +97,12 @@
                 body: JSON.stringify({ startYear, endYear, numDates })
             });
 
-            const dates = await response.json();
+            generatedDates = await response.json(); // Store dates for later use
+
             datesContainer.innerHTML = ''; // Clear previous dates
 
             // Display each date with dropdown
-            dates.forEach((date, index) => {
+            generatedDates.forEach((date, index) => {
                 const row = document.createElement('div');
                 row.className = 'date-row';
                 row.innerHTML = `
@@ -121,7 +124,7 @@
             submitButton.style.display = 'block';
         });
 
-        // Submit answers
+        // When submitting answers
         submitButton.addEventListener('click', async () => {
             const rows = datesContainer.querySelectorAll('.date-row');
             const answers = [];
@@ -132,11 +135,11 @@
                 answers.push(customValue || dropdownValue); // Prefer custom input
             });
 
-            // Send answers to backend for evaluation
+            // Send both dates and answers to the backend
             const response = await fetch('/check-answers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ answers })
+                body: JSON.stringify({ dates: generatedDates, answers })
             });
 
             const result = await response.json();
