@@ -12,10 +12,14 @@ DAYS_OF_THE_WEEK = ["Sunday",
                     "Saturday"]
 
 
+def is_leap(year: int) -> bool:
+    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+
+
 def first_day_of_year(year: int) -> int:
-    delta = year - 1
-    offset = delta + delta // 4 - delta // 100 + delta // 400
-    return (offset + 6) % 7
+    years = year - 1601
+    offset = years + years // 4 - years // 100 + years // 400
+    return offset % 7
 
 
 def calculate_day_of_week(year: int, day_of_the_year: int) -> int:
@@ -25,56 +29,34 @@ def calculate_day_of_week(year: int, day_of_the_year: int) -> int:
 
 def calculate_day_and_month(day: int, is_leap: bool) -> tuple[int, int]:
     month = 1
-    month_length = 31
-    while day > month_length:
-        day -= month_length
+    month_lengths = [31, 29 if is_leap else 28,
+                     31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+    while day > month_lengths[month - 1]:
+        day -= month_lengths[month - 1]
         month += 1
-        if month == 2:
-            month_length = 29 if is_leap else 28
-        elif month < 8 and month % 2 == 1:
-            month_length = 31
-        elif month < 8:
-            month_length = 30
-        elif month % 2 == 0:
-            month_length = 31
-        else:
-            month_length = 30
+
     return day, month
 
 
 def calculate_day_of_the_year(month: int, day: int, is_leap: bool) -> int:
-    number_of_days = day
-    month_index = 0
-    while month > month_index:
-        number_of_days += month_length
-        month_index += 1
-        if month_index == 2:
-            month_length = 29 if is_leap else 28
-        elif month_index < 8 and month_index % 2 == 1:
-            month_length = 31
-        elif month_index < 8:
-            month_length = 30
-        elif month_index % 2 == 0:
-            month_length = 31
-        else:
-            month_length = 30
+    month_lengths = [31, 29 if is_leap else 28,
+                     31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-    return number_of_days
+    return sum(month_lengths[:month - 1]) + day
 
 
 def to_date_string(year: int, day_of_the_year: int):
-    is_leap = year % 4 == 0
-    day, month = calculate_day_and_month(day_of_the_year, is_leap)
+    day, month = calculate_day_and_month(day_of_the_year, is_leap(year))
     return f'{year}-{month}-{day}'
 
 
 def from_date_string(date: str) -> tuple[int, int]:
     parts = date.split("-")
     year = int(parts[0])
-    is_leap = year % 4 == 0
     month = int(parts[1])
     day = int(parts[2])
-    day_of_the_year = calculate_day_of_the_year(month, day, is_leap)
+    day_of_the_year = calculate_day_of_the_year(month, day, is_leap(year))
     return year, day_of_the_year
 
 
@@ -86,7 +68,7 @@ def index():
 @app.route('/generate-dates', methods=['POST'])
 def generate_dates():
     data = request.json
-    start_year = int(data['startYear'])
+    start_year = max(int(data['startYear']), 1600)
     end_year = int(data['endYear'])
     num_dates = int(data['numDates'])
 
@@ -106,7 +88,7 @@ def check_answers():
     data = request.json
     answers = data['answers']
     dates = data['dates']
-    result = "Results:\n"
+    result = "Results: <br>"
 
     for i in range(len(answers)):
         answer = answers[i]
@@ -114,10 +96,10 @@ def check_answers():
         year, day_of_the_year = from_date_string(date)
         correct = calculate_day_of_week(year, day_of_the_year)
         if correct == answer or correct == DAYS_OF_THE_WEEK.index(answer):
-            result += f"{date} CORRECT\n"
+            result += f"{date}: CORRECT <br>"
         else:
-            result += f"{date} WRONG Answer: {
-                answer} Was acually: {DAYS_OF_THE_WEEK[correct]}\n"
+            result += f"{date}: WRONG | Answer: {
+                answer} | Was actually: {DAYS_OF_THE_WEEK[correct]} <br>"
 
     return jsonify({'message': result})
 
