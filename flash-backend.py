@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 import random
 
 app = Flask(__name__)
@@ -37,6 +37,11 @@ def to_date_string(year: int, day_of_the_year: int):
     is_leap = year % 4 == 0
     day, month = caluclate_day_and_month(day_of_the_year, is_leap)
     return f'{year}-{month}-{day}'
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/generate-dates', methods=['POST'])
