@@ -98,8 +98,8 @@ def check_answers():
         if correct == answer or correct == DAYS_OF_THE_WEEK.index(answer):
             result += f"{date}: CORRECT <br>"
         else:
-            result += f"{date}: WRONG | Answer: {
-                answer} | Was actually: {DAYS_OF_THE_WEEK[correct]} <br>"
+            result += f"{date}: WRONG | Answer: \
+            {answer} | Was actually: {DAYS_OF_THE_WEEK[correct]} <br>"
 
     return jsonify({'message': result})
 
