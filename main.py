@@ -91,15 +91,24 @@ def check_answers():
     result = "Results: <br>"
 
     for i in range(len(answers)):
-        answer = answers[i]
+        answer: str = answers[i]
         date = dates[i]
         year, day_of_the_year = from_date_string(date)
-        correct = calculate_day_of_week(year, day_of_the_year)
-        if correct == answer or correct == DAYS_OF_THE_WEEK.index(answer):
+        actual_answer = calculate_day_of_week(year, day_of_the_year)
+
+        print(isinstance(answer, int))
+        print(isinstance(answer, str))
+
+        was_correct = False
+        if (answer.isdigit() and int(answer) % 7 == actual_answer) or \
+                answer.strip().lower() == DAYS_OF_THE_WEEK[actual_answer].lower():
+            was_correct = True
+
+        if was_correct:
             result += f"{date}: CORRECT <br>"
         else:
             result += f"{date}: WRONG | Answer: \
-            {answer} | Was actually: {DAYS_OF_THE_WEEK[correct]} <br>"
+            {answer} | Was actually: {DAYS_OF_THE_WEEK[actual_answer]} <br>"
 
     return jsonify({'message': result})
 
