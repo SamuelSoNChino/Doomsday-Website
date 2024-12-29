@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 import random
 
 app = Flask(__name__)
@@ -46,7 +46,7 @@ def calculate_day_of_the_year(month: int, day: int, is_leap: bool) -> int:
     return sum(month_lengths[:month - 1]) + day
 
 
-def to_date_string(year: int, day_of_the_year: int):
+def to_date_string(year: int, day_of_the_year: int) -> str:
     day, month = calculate_day_and_month(day_of_the_year, is_leap(year))
     return f'{year}-{month}-{day}'
 
@@ -61,13 +61,14 @@ def from_date_string(date: str) -> tuple[int, int]:
 
 
 @app.route('/')
-def index():
+def index() -> str:
     return render_template('index.html')
 
 
 @app.route('/generate-dates', methods=['POST'])
-def generate_dates():
+def generate_dates() -> Response:
     data = request.json
+    assert data is not None
     start_year = max(int(data['startYear']), 1600)
     end_year = int(data['endYear'])
     num_dates = int(data['numDates'])
@@ -84,8 +85,9 @@ def generate_dates():
 
 
 @app.route('/check-answers', methods=['POST'])
-def check_answers():
+def check_answers() -> Response:
     data = request.json
+    assert data is not None
     answers = data['answers']
     dates = data['dates']
     result = "Results: <br>"
@@ -100,7 +102,7 @@ def check_answers():
         print(isinstance(answer, str))
 
         was_correct = False
-        if (answer.isdigit() and int(answer) % 7 == actual_answer) or \
+        if (answer.isdecimal() and int(answer) % 7 == actual_answer) or \
                 answer.strip().lower() == DAYS_OF_THE_WEEK[actual_answer].lower():
             was_correct = True
 
