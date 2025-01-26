@@ -103,8 +103,7 @@ def check_answers() -> Response:
 
         was_correct = False
         if (answer.isdecimal() and int(answer) % 7 == actual_answer) or \
-                answer.strip().lower() == \
-                DAYS_OF_THE_WEEK[actual_answer].lower():
+                answer.strip().lower() == DAYS_OF_THE_WEEK[actual_answer].lower():
             was_correct = True
 
         if was_correct:
